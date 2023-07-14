@@ -15,12 +15,13 @@ class MemAdmin(admin.ModelAdmin):
     list_display_links = ("author", "title",)
     list_editable = ("is_moderate",)
     list_filter = ("author", "title", "description", "image", "date_time", "is_moderate")
+    list_feedback = ("likes", "comments")
     fieldsets = (
         (
             "Основное",
             {
                 "fields": (
-                    "author", "title", "description", "image",
+                    "author", "title", "description", "image", "likes", "comments"
                 )
             },
         ),

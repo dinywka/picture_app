@@ -75,3 +75,60 @@ def logout_f(request: HttpRequest) -> HttpResponse:
     """Выход из аккаунта"""
     logout(request)
     return redirect(reverse('login'))
+
+
+def list_view(request: HttpRequest) -> HttpResponse:
+    """_view"""
+
+    memes = models.Mem.objects.all()
+
+    return render(request, "picture_app/list.html", {"images": memes})
+
+
+def detail_view(request: HttpRequest, pk: str) -> HttpResponse:
+    """_view"""
+    return redirect(reverse("login"))
+
+
+# def create_view(request: HttpRequest, pk: str) -> HttpResponse:
+#     """_view"""
+#     return redirect(reverse("login"))
+
+
+def create_mem(request):
+    """Создание нового мема."""
+
+    if request.method == "GET":
+        return render(request, "picture_app/create_mem.html")
+    elif request.method == "POST":
+        title = request.POST.get("title", None)
+        avatar = request.FILES.get("avatar", None)
+        models.Mem.objects.create(author=request.user, title=title, description="", image=avatar)  # SQL
+        return redirect(reverse("list"))
+    else:
+        raise ValueError("Invalid method")
+
+
+
+def update_mem(request, pk: str):
+    """Обновление существующего мема."""
+
+    if request.method == "GET":
+        mem = models.Mem.objects.get(id=int(pk))  # SQL
+        mem.title = mem.title[::-1]
+        # mem.is_moderate = False
+        mem.save()
+        return redirect(reverse("list_memes"))
+    else:
+        raise ValueError("Invalid method")
+
+
+def delete_mem(request, pk: str):
+    """Удаление мема."""
+
+    if request.method == "GET":
+        mem = models.Mem.objects.get(id=int(pk))  # SQL
+        mem.delete()
+        return redirect(reverse("list_memes"))
+    else:
+        raise ValueError("Invalid method")

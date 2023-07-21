@@ -45,7 +45,8 @@ def check_user_group(context: str, groups: str = "", cnt=1, c=1) -> bool:
 @register.simple_tag(name='digit_beautify')
 def digit_beautify(value):
     locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
-    return locale.format('%d', value, grouping=True)
+    return locale.format_string('%.2f', value, grouping=True)
+
 
 
 @register.simple_tag(takes_context=True)

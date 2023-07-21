@@ -132,3 +132,16 @@ def delete_mem(request, pk: str):
         return redirect(reverse("list_memes"))
     else:
         raise ValueError("Invalid method")
+
+
+def tags(request):
+    memes = [
+        {
+            "id": x,
+            "title": f"Наименование {x}",
+            "description": {"data1": {"price": random.randint(1, 1000000) + random.random()}}
+
+        }
+        for x in range(1, 20 + 1)
+    ]
+    return render(request, "picture_app/tags.html", {"memes": memes})

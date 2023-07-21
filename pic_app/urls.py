@@ -8,6 +8,7 @@ urlpatterns = [
     path('logout/', views.logout_f, name="logout"),
 
     path("list/", views.list_view, name="list"),
+    path("tags/", views.tags, name="tags"),
 
     #
     path("list/", views.list_view, name="posts"),

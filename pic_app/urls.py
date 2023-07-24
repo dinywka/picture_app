@@ -10,13 +10,14 @@ urlpatterns = [
     path("list/", views.list_view, name="list"),
     path("tags/", views.tags, name="tags"),
 
+    path("delete_mem/<str:pk>/", views.delete_mem, name="delete_mem"),
+
     #
-    path("list/", views.list_view, name="posts"),
-    path("detail/<str:pk>/", views.detail_view, name="post_detail"),
-    path("detail/<str:pk>/", views.detail_view, name="post_change"),
-    path("detail/<str:pk>/", views.detail_view, name="post_delete"),
-    #
-    path("detail/<str:pk>/", views.detail_view, name="detail"),
+    path("news/list/", views.news_list, name="news_list"),
+    path("news/detail/<str:pk>/", views.news_detail, name="news_detail"),
+    path("news/comments/create/<str:pk>/", views.news_comments_create, name="news_comments_create"),
+    path('rating/change/<str:pk>/<str:status>/', views.rating_change, name="rating_change"),
+
     path("create/", views.create_mem, name="create_mem"),
 
 ]

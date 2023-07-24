@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from pic_app import utils
 from django.urls import reverse
 import random
 import re
@@ -118,7 +119,7 @@ def update_mem(request, pk: str):
         mem.title = mem.title[::-1]
         # mem.is_moderate = False
         mem.save()
-        return redirect(reverse("list_memes"))
+        return redirect(reverse("list"))
     else:
         raise ValueError("Invalid method")
 
@@ -129,7 +130,7 @@ def delete_mem(request, pk: str):
     if request.method == "GET":
         mem = models.Mem.objects.get(id=int(pk))  # SQL
         mem.delete()
-        return redirect(reverse("list_memes"))
+        return redirect(reverse("list"))
     else:
         raise ValueError("Invalid method")
 
@@ -145,3 +146,70 @@ def tags(request):
         for x in range(1, 20 + 1)
     ]
     return render(request, "picture_app/tags.html", {"memes": memes})
+
+
+
+def news_list(request):
+    """Возврат списка новостей."""
+
+    search = request.POST.get("search", "")
+    news = utils.CustomCache.caching(key="news_list", timeout=2,
+                                     lambda_func=lambda: models.News.objects.all().filter(is_ban=False).filter(
+                                         title__icontains=search))
+    current_page = utils.CustomPaginator.paginate(object_list=news, limit=3, request=request)
+    return render(request, "picture_app/news_list.html", context={"current_page": current_page, "search": search})
+
+
+def news_detail(request, pk):
+    """Возврат новости."""
+
+    new = utils.CustomCache.caching(key="news_detail_" + str(pk), timeout=5,
+                                    lambda_func=lambda: models.News.objects.get(id=int(pk)))
+    comments = utils.CustomCache.caching(key="comments_news_detail_" + str(pk), timeout=1,
+                                         lambda_func=lambda: models.NewsComments.objects.filter(news=new))
+    current_page = utils.CustomPaginator.paginate(object_list=comments, limit=3, request=request)
+
+    post_rating_objs = models.NewsRatings.objects.all().filter(post=new)
+    rating = post_rating_objs.filter(status=True).count() - post_rating_objs.filter(status=False).count()
+    count_r = post_rating_objs.count()
+
+    return render(request, "picture_app/news_detail.html", context=
+    {"new": new, "current_page": current_page, "rating": {"rating": rating, "count_r": count_r}
+     })
+
+
+def news_comments_create(request, pk):
+    """Создание комментария."""
+
+    if request.method != "POST":
+        raise Exception("Invalid method")
+
+    news = models.News.objects.get(id=int(pk))
+    user = request.user
+    text = request.POST.get("text", "")
+    models.NewsComments.objects.create(news=news, author=user, text=text)
+
+    return redirect(reverse('news_detail', args=(pk,)))
+
+
+def rating_change(request, pk, status):
+    """Создаёт рейтинг к новости"""
+
+    if request.method == "GET":
+        post_obj = models.News.objects.get(id=int(pk))
+        author_obj = request.user
+        status = True if int(status) == 1 else False
+        post_rating_objs = models.NewsRatings.objects.filter(post=post_obj, author=author_obj)
+        if len(post_rating_objs) <= 0:
+            models.NewsRatings.objects.create(post=post_obj, author=author_obj, status=status)
+        else:
+            post_rating_obj = post_rating_objs[0]
+            if (status is True and post_rating_obj.status is True) or \
+                    (status is False and post_rating_obj.status is False):
+                post_rating_obj.delete()
+            else:
+                post_rating_obj.status = status
+                post_rating_obj.save()
+        return redirect(reverse('news_detail', args=[pk]))
+    else:
+        raise Exception("Method not allowed!")

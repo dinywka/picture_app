@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pic_app',
+    'fontawesomefree',
 ]
 
 MIDDLEWARE = [
@@ -79,6 +80,28 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "database": {  # экономия ОЗУ == для тяжёлых и не особо нужных
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache_table",
+        "TIMEOUT": "120",
+        "OPTIONS": {
+            "MAX_ENTIES": 200,
+        },
+    },
+    "ram_cache": {  # дорого для ОЗУ == для нужных данных
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "django_ram_cache_table",
+    },
 }
 
 

@@ -38,3 +38,39 @@ class MemAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Mem, MemAdmin)
+
+
+class NewsAdmin(admin.ModelAdmin):
+    """
+    Настройки отображения, фильтрации и поиска модели:'News' на панели администратора
+    """
+
+    list_display = ("author", "title", "description", "image", "date_time", "is_ban")
+    list_display_links = ("author", "title",)
+    list_editable = ("is_ban",)
+    list_filter = ("author", "title", "description", "image", "date_time", "is_ban")
+    fieldsets = (
+        (
+            "Основное",
+            {
+                "fields": (
+                    "author", "title", "description", "image",
+                )
+            },
+        ),
+        (
+            "Техническое",
+            {
+                "fields": (
+                    "date_time", "is_ban"
+                )
+            },
+        ),
+    )
+    search_fields = ["title", "description"]
+
+
+# admin.site.register(models.Mem, MemAdmin)
+admin.site.register(models.News, NewsAdmin)
+admin.site.register(models.NewsComments)
+admin.site.register(models.NewsRatings)

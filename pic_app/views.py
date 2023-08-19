@@ -8,6 +8,8 @@ from django.urls import reverse
 import random
 import re
 from pic_app import models
+import requests
+from bs4 import BeautifulSoup
 
 # Create your views here.
 def home(request):
@@ -213,3 +215,29 @@ def rating_change(request, pk, status):
         return redirect(reverse('news_detail', args=[pk]))
     else:
         raise Exception("Method not allowed!")
+
+
+def valute(request):
+    #выводить на страницу курс валют: доллар, юань, рубль
+    url = "https://kase.kz/ru/currency/"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    kzt_usd = get_valute(soup, "#USDKZT")
+    kzt_cny = get_valute(soup, "#CNYKZT")
+    kzt_rub = get_valute(soup, "#RUBKZT")
+    return HttpResponse(f"KZT TO USD = {kzt_usd}, CNY TO KZT = {kzt_cny}, RUB TO KZT = {kzt_rub}")
+
+def get_valute(soup, href):
+    usd = soup.find_all('a', href=href)
+    currency = list(filter(lambda x: len(x) > 1, usd[0].text.split(' ')))[1].strip()
+    return currency
+
+def get_api_valute(request):
+    data = {
+        "USD": 450,
+        "RUB": 4.5,
+        "CNY": 64,
+    }
+    return JsonResponse(data)
+
+

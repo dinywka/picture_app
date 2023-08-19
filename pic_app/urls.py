@@ -19,5 +19,7 @@ urlpatterns = [
     path('rating/change/<str:pk>/<str:status>/', views.rating_change, name="rating_change"),
 
     path("create/", views.create_mem, name="create_mem"),
+    path("valute/", views.valute, name="valute"),
+    path("api/valute", views.get_api_valute, name="api_valute")
 
 ]
